@@ -106,6 +106,6 @@ script/flash_and_log.sh 30 /dev/ttyACM0     # 指定串口设备
 
 ## 许可
 
-`zephyr_firmware/src/main.c` 与 `zephyr_firmware/CMakeLists.txt` 采用 Apache-2.0 许可，与 Zephyr 保持一致，
-文件头部带有 SPDX 标识。`zephyr_firmware/doc/` 下的原理图 PDF 及其整理结果来自立创开发板的公开资料，
-版权归原作者所有。
+工程采用 Apache-2.0 许可，正文见 [LICENSE](LICENSE)，与 Zephyr 保持一致，源文件头部带有 SPDX 标识。
+`zephyr_firmware/doc/` 下的原理图 PDF 及其整理结果来自立创开发板的公开资料，版权归原作者所有，
+不适用上述许可。
