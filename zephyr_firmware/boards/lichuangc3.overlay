@@ -1,0 +1,60 @@
+/*
+ * 立创·实战派 ESP32-C3 开发板 V1.3 的板级覆盖配置
+ * 基础板: esp32c3_devkitc (ESP32-C3 QFN32 + 外部 SPI Flash)
+ * 引脚与网络依据原理图整理结果, 见 doc/SCH_ESP32-C3-V1_3.md
+ */
+
+#include <zephyr/dt-bindings/pinctrl/esp32c3-pinctrl.h>
+
+/ {
+	chosen {
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+	};
+};
+
+/*
+ * UART0 经 CH343P 转 USB (GPIO21 TX / GPIO20 RX), 沿用 devkitc 的 uart0_default 引脚配置。
+ * BOOT 按键为 GPIO9 低有效, 与 devkitc 的 sw0 (user_button1) 同脚, 直接沿用板级定义。
+ */
+
+/*
+ * 本板没有原生 USB, GPIO18/GPIO19 用作外部接口 J2 的信号, 必须关闭 USB Serial/JTAG,
+ * 否则 USB 控制器会占用这两脚。
+ */
+&usb_serial {
+	status = "disabled";
+};
+
+/*
+ * 本板 TFT 走 SPI2: SCK=GPIO3, MOSI=GPIO5, CS=GPIO4, DC=GPIO6, 与 devkitc 的
+ * spim2_default (GPIO2/6/7/10) 不同, 未配置显示屏前先关闭该总线, 避免占用本板引脚。
+ */
+&spi2 {
+	status = "disabled";
+};
+
+/* I2C0: SDA=GPIO0, SCL=GPIO1, 板上 R4/R5 4.7kΩ 已上拉到 3V3 */
+&pinctrl {
+	i2c0_lichuang: i2c0_lichuang {
+		group1 {
+			pinmux = <I2C0_SDA_GPIO0>,
+				 <I2C0_SCL_GPIO1>;
+			bias-pull-up;
+			drive-open-drain;
+			output-high;
+		};
+	};
+};
+
+&i2c0 {
+	status = "okay";
+	pinctrl-0 = <&i2c0_lichuang>;
+	pinctrl-names = "default";
+};
+
+/* 外部 SPI NOR Flash 为 MX25L6433FM2I-08G, 容量 8MB */
+&flash0 {
+	reg = <0x0 DT_SIZE_M(8)>;
+	ranges = <0x0 0x0 DT_SIZE_M(8)>;
+};
