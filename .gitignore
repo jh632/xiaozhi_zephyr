@@ -1,0 +1,51 @@
+# xiaozhi_zephyr 工程忽略规则
+# 参考 xiaozhi-esp32 原工程 https://github.com/78/xiaozhi-esp32 的 .gitignore, 按 Zephyr 构建体系调整。
+# 判断依据: 构建产物、缓存、中间结果、本地环境、机器相关配置不进入版本管理;
+# 源码、板级配置、prj.conf、原理图与文档、脚本一律跟踪。
+
+# ---- Zephyr 与 west 构建产物 ----
+build/
+build-*/
+cmake-build-*/
+twister-out*/
+.west/
+compile_commands.json
+
+# ---- 烧录镜像与固件发布包 ----
+*.bin
+*.hex
+*.elf
+*.uf2
+dist/
+releases/
+
+# ---- 中间结果与运行日志 ----
+# .cache/ 存放分析脚本与中间结果, log/ 存放 flash_and_log.sh 抓取的串口日志
+.cache/
+log/
+*.log
+
+# ---- Python 虚拟环境与缓存 ----
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# ---- 本地配置与密钥 ----
+.env
+
+# ---- IDE 与编辑器 ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.ccls-cache/
+
+# ---- 操作系统生成的文件 ----
+.DS_Store
+Thumbs.db
