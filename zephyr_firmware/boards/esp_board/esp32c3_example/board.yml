@@ -1,0 +1,6 @@
+board:
+  name: esp32c3_example
+  full_name: ESP32-C3 Voice Assistant Example
+  vendor: esp_board
+  socs:
+  - name: esp32c3

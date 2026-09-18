@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "xiaozhi-zephyr 固件配置"
+
+# 应用目录下的 Kconfig 会被 Zephyr 当作 KCONFIG_ROOT, 必须先引入 Zephyr 自身的配置树。
+# source 的路径相对 Zephyr 根目录, 引用应用自己的文件要用 rsource。
+source "Kconfig.zephyr"
+
+rsource "drivers/audio/Kconfig"

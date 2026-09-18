@@ -1,0 +1,7 @@
+# 语音助手示例板配置
+
+# Copyright (c) 2024 Espressif Systems (Shanghai) Co., Ltd.
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_ESP32C3_EXAMPLE
+	select SOC_ESP32C3_WROOM_02_N4

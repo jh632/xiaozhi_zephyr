@@ -1,0 +1,48 @@
+/*
+ * Copyright (c) 2024 Espressif Systems (Shanghai) Co., Ltd.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * 引脚复用定义, 按立创·实战派 ESP32-C3 开发板 V1.3 的连接编写
+ */
+
+#include <zephyr/dt-bindings/pinctrl/esp32c3-pinctrl.h>
+
+&pinctrl {
+	/* 控制台, UART0 经 CH343P 转 USB */
+	uart0_default: uart0_default {
+		group1 {
+			pinmux = <UART0_TX_GPIO21>;
+			output-high;
+		};
+
+		group2 {
+			pinmux = <UART0_RX_GPIO20>;
+			bias-pull-up;
+		};
+	};
+
+	/* 编解码器 ES8311 的控制通道 (地址 0x18) */
+	i2c0_default: i2c0_default {
+		group1 {
+			pinmux = <I2C0_SDA_GPIO0>,
+				 <I2C0_SCL_GPIO1>;
+			bias-pull-up;
+			drive-open-drain;
+			output-high;
+		};
+	};
+
+	/* 语音采集与播放, 接编解码器 ES8311:
+	 * MCK/BCK/WS 为时钟与帧同步, DI 为采集数据, DO 为播放数据
+	 */
+	i2s_default: i2s_default {
+		group1 {
+			pinmux = <I2S_MCLK_GPIO10>,
+				 <I2S_O_BCK_GPIO8>,
+				 <I2S_O_WS_GPIO12>,
+				 <I2S_I_SD_GPIO7>,
+				 <I2S_O_SD_GPIO11>;
+		};
+	};
+};

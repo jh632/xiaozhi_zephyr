@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0
+
+config AUDIO_CODEC_ES8311
+	bool "Everest ES8311 音频编解码器驱动"
+	default y
+	select I2C
+	select REGULATOR
+	depends on DT_HAS_EVEREST_ES8311_ENABLED
+	help
+	  启用 Everest Semiconductor ES8311 单声道音频编解码器驱动。
+
+	  驱动实现 Zephyr 的 audio codec 接口, 负责时钟链、串行数据格式、
+	  音量、静音与模拟通路的上下电, 并可按设备树中的 pa-supply 控制
+	  扬声器功放的开关。
