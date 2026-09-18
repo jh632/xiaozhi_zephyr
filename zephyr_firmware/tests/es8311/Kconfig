@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "ES8311 驱动测试配置"
+
+source "Kconfig.zephyr"
+
+rsource "../../drivers/audio/Kconfig"

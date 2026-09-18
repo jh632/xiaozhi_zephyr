@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  Everest Semiconductor ES8311 low power mono audio codec.
+
+  器件工作在从机模式, MCLK/BCLK/LRCK 由 I2S 控制器提供, 应用层通过
+  Zephyr 的 audio codec 接口访问。
+
+compatible: "everest,es8311"
+
+include: [i2c-device.yaml]
+
+properties:
+  pa-supply:
+    type: phandle
+    description: |
+      扬声器功放(本板为 NS4150B)的供电开关, 指向一个 regulator 节点。
+      播放开始时由驱动使能, 播放结束后关闭, 使能顺序与解除静音配合避免爆音。
