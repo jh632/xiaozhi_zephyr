@@ -10,12 +10,14 @@
 |---|---|---|
 | MCU + Wi-Fi，运行 Zephyr、联网 | ESP32-C3 + Wi-Fi | SoC 自带，`&wifi` 置 okay |
 | 语音采集 | 麦克风经 ES8311 编解码器数字化 | `&i2s` 输入通道（DI=GPIO7） |
-| 音频输出 | ES8311 的 DAC + NS4150B 功放 | `&i2s` 输出通道（DO=GPIO11）、功放使能 GPIO13 |
+| 音频输出 | ES8311 的 DAC + NS4150B 功放 | `&i2s` 输出通道（DO=GPIO11）、`speaker-amp` 稳压器节点（GPIO13） |
 | 交互按键 | BOOT 按键 | `gpio_keys`（GPIO9） |
 
 具体引脚按照立创·实战派 ESP32-C3 开发板 V1.3 的连接编写，可以直接在真板上构建、
-烧录、验证。编解码器 ES8311 的控制通道是 I2C0（地址 0x18），Zephyr 主线还没有它的
-驱动，实现驱动时才需要在设备树里补充节点。
+烧录、验证。编解码器 ES8311 挂在 I2C0（地址 0x18）上，它在设备树里的节点是
+`es8311@18`，功放使能脚以 `pa-supply` 指向 `speaker-amp` 节点，播放期间由 ES8311
+驱动开关。驱动实现在 [../../drivers/audio/es8311.c](../../drivers/audio/es8311.c)，
+配套测试在 [../../tests/es8311](../../tests/es8311)。
 
 ## 文件说明
 

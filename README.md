@@ -10,7 +10,9 @@ Zephyr 源码，编译时通过 `ZEPHYR_BASE` 指向工作区中的 Zephyr，编
 
 ## 当前进度
 
-小智的语音交互功能还没有开始实现，音频采集与播放、唤醒词、通信协议对接、MCP 协议都处于未开发状态。
+ES8311 音频编解码器驱动（[zephyr_firmware/drivers/audio/es8311.c](zephyr_firmware/drivers/audio/es8311.c)）
+已经实现，应用侧通过 Zephyr 的 audio codec 接口配置时钟、格式、音量与静音，播放期间由驱动开关功放。
+唤醒词、通信协议对接、MCP 协议、小智的语音交互流程还未开始实现。
 
 ## 硬件概况
 
@@ -35,9 +37,9 @@ I2S 使用 GPIO7/8/10/11/12，其中 GPIO11/12/13 原本是外部 Flash 的 VDD_
 ## 板级配置
 
 Zephyr 主线已经有这块板子的板定义 `esp32c3_lckfb`（`zephyr/boards/others/esp32c3_lckfb`），
-工程直接使用它。本板的引脚分配与它一致，唯一差异是 USB Serial/JTAG：官方定义默认打开，
-而本板的 GPIO18/19 未接原生 USB、用作外部接口 J2，这条差异写在
-`zephyr_firmware/boards/esp32c3_lckfb.overlay` 里，构建时按板名自动应用。
+工程直接使用它。本板与它的差异写在 `zephyr_firmware/boards/esp32c3_lckfb.overlay` 里，
+构建时按板名自动应用：关闭官方定义里默认打开的 USB Serial/JTAG（本板 GPIO18/19 未接原生 USB、
+用作外部接口 J2），补上 I2S 全双工缺的帧同步与播放数据脚，并增加 ES8311 与功放节点。
 
 另外 `zephyr_firmware/boards/esp_board/esp32c3_example/` 保留了一份语音助手板的最小板级定义作为示例，
 只描述项目需要的硬件（MCU + Wi-Fi、语音采集、音频输出、交互按键），

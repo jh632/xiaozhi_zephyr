@@ -52,9 +52,11 @@
 		};
 	};
 
-	/* 功放使能, 播放音频时置高, 应用通过 DT_PATH(zephyr_user) 读取 */
-	zephyr,user {
-		pa-enable-gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+	/* 扬声器功放 NS4150B 的使能脚, 播放期间由 ES8311 驱动打开 */
+	speaker_amp: speaker-amp {
+		compatible = "regulator-fixed";
+		regulator-name = "ns4150b";
+		enable-gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
 	};
 };
 
@@ -85,6 +87,13 @@
 	clock-frequency = <I2C_BITRATE_STANDARD>;
 	pinctrl-0 = <&i2c0_default>;
 	pinctrl-names = "default";
+
+	/* 语音采集走 ES8311 的 ADC, 播放走它的 DAC, 功放使能由驱动开关 */
+	audio_codec: es8311@18 {
+		compatible = "everest,es8311";
+		reg = <0x18>;
+		pa-supply = <&speaker_amp>;
+	};
 };
 
 /* 语音采集与播放, 数据经编解码器 ES8311 在 I2S 上与 MCU 交换 */

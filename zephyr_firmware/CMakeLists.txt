@@ -8,4 +8,8 @@ list(APPEND BOARD_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(lc_esp32c3)
 
+if(CONFIG_AUDIO_CODEC_ES8311)
+	target_sources(app PRIVATE drivers/audio/es8311.c)
+endif()
+
 target_sources(app PRIVATE src/main.c)
