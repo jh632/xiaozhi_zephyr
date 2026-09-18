@@ -12,6 +12,9 @@ Zephyr 源码，编译时通过 `ZEPHYR_BASE` 指向工作区中的 Zephyr，编
 
 ES8311 音频编解码器驱动（[zephyr_firmware/drivers/audio/es8311.c](zephyr_firmware/drivers/audio/es8311.c)）
 已经实现，应用侧通过 Zephyr 的 audio codec 接口配置时钟、格式、音量与静音，播放期间由驱动开关功放。
+真板上已经能用 440 Hz 放音与麦克风回采核对整条音频通路，驱动写出的寄存器行为另有 native_sim 单元测试覆盖。
+把音频文件转成原始 PCM 后用扬声器播放的独立示例在
+[zephyr_firmware/samples/playback](zephyr_firmware/samples/playback)。
 唤醒词、通信协议对接、MCP 协议、小智的语音交互流程还未开始实现。
 
 ## 硬件概况

@@ -197,26 +197,6 @@ static uint8_t es8311_volume_to_reg(int volume_db)
 	return (uint8_t)(VOLUME_ZERO_DB_REG + (volume_db * 2));
 }
 
-/* 关键寄存器转储, 用于排查上电配置是否真正写入器件 */
-static const uint8_t es8311_dump_list[] = {
-	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x09, 0x0A, 0x0C, 0x0D, 0x0E, 0x12,
-	0x13, 0x14, 0x15, 0x16, 0x17, 0x1B, 0x1C, 0x31, 0x32, 0x37, 0x44, 0x45,
-};
-
-static void es8311_dump_regs(const struct device *dev, const char *stage)
-{
-	for (size_t idx = 0; idx < ARRAY_SIZE(es8311_dump_list); idx++) {
-		uint8_t value = 0U;
-
-		if (es8311_read_reg(dev, es8311_dump_list[idx], &value) < 0) {
-			LOG_ERR("%s: 读取寄存器 0x%02X 失败", stage, es8311_dump_list[idx]);
-			return;
-		}
-
-		LOG_DBG("%s: 寄存器 0x%02X = 0x%02X", stage, es8311_dump_list[idx], value);
-	}
-}
-
 static int es8311_pa_enable(const struct device *dev, bool enable)
 {
 	const struct es8311_config *cfg = dev->config;
@@ -288,7 +268,6 @@ static int es8311_tx_enable(const struct device *dev, bool enable)
 		}
 
 		data->active_dirs |= AUDIO_DAI_DIR_TX;
-		es8311_dump_regs(dev, "播放开始后");
 
 		return 0;
 	}
@@ -544,7 +523,6 @@ static int es8311_configure(const struct device *dev, struct audio_codec_cfg *cf
 	}
 
 	data->configured = true;
-	es8311_dump_regs(dev, "配置后");
 	LOG_DBG("配置完成: %u Hz, %u bit, %u 声道, MCLK %u Hz",
 		cfg->dai_cfg.i2s.frame_clk_freq, cfg->dai_cfg.i2s.word_size,
 		cfg->dai_cfg.i2s.channels, cfg->mclk_freq);

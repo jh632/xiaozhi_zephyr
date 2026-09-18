@@ -1,0 +1,50 @@
+/*
+ * 立创·实战派 ESP32-C3 开发板 V1.3 在官方 esp32c3_lckfb 板定义之外的差异
+ * 引脚与网络依据原理图整理结果, 见 ../../../doc/SCH_ESP32-C3-V1_3.md
+ */
+
+/*
+ * 本板没有原生 USB, GPIO18/GPIO19 用作外部接口 J2, 官方板定义默认打开
+ * USB Serial/JTAG, 会占用这两脚, 因此关闭。
+ */
+&usb_serial {
+	status = "disabled";
+};
+
+/* 官方板定义只把 MCLK/BCK/DI 接进 I2S, 播放还需要帧同步与播放数据脚 */
+&pinctrl {
+	i2s_default {
+		group2 {
+			pinmux = <I2S_O_WS_GPIO12>,
+				 <I2S_O_SD_GPIO11>;
+		};
+	};
+};
+
+/ {
+	/* 扬声器功放 NS4150B 的使能脚, 播放期间由 ES8311 驱动打开 */
+	speaker_amp: speaker-amp {
+		compatible = "regulator-fixed";
+		regulator-name = "ns4150b";
+		enable-gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&i2c0 {
+	/* ES8311 音频编解码器, CE 接地, 7 位地址 0x18 */
+	audio_codec: es8311@18 {
+		compatible = "everest,es8311";
+		reg = <0x18>;
+		pa-supply = <&speaker_amp>;
+	};
+};
+
+/* 语音播放的数据经编解码器 ES8311 在 I2S 上交换 */
+&i2s {
+	status = "okay";
+};
+
+/* I2S 发送数据经 GDMA 搬运 */
+&dma {
+	status = "okay";
+};
