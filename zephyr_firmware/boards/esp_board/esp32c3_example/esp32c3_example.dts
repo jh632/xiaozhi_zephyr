@@ -1,0 +1,115 @@
+/*
+ * Copyright (c) 2024 Espressif Systems (Shanghai) Co., Ltd.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * 语音助手类板子的最小板级定义示例, 基于 esp32c3_devkitc 改写。
+ *
+ * 需求与对应节点:
+ *   1. MCU + Wi-Fi   运行 Zephyr、联网        -> ESP32-C3 + &wifi
+ *   2. 语音采集      采集用户语音             -> &i2s 输入 (ES8311 的 ADC, DI=GPIO7)
+ *   3. 音频输出      播放 TTS                 -> &i2s 输出 (ES8311 的 DAC, DO=GPIO11)
+ *                                                加 NS4150B 功放使能 GPIO13
+ *   4. 交互按键      触发/结束语音交互         -> gpio_keys (GPIO9)
+ *
+ * 引脚与网络按照立创·实战派 ESP32-C3 开发板 V1.3 的连接编写, 便于在真板上验证,
+ * 见 doc/SCH_ESP32-C3-V1_3.md。
+ */
+
+/dts-v1/;
+
+#include <espressif/esp32c3/esp32c3_wroom_n4.dtsi>
+#include "esp32c3_example-pinctrl.dtsi"
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include <espressif/partitions_0x0_default.dtsi>
+
+/ {
+	model = "ESP32-C3 Voice Assistant Example";
+	compatible = "espressif,esp32c3";
+
+	chosen {
+		zephyr,sram = &sram1;
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+	};
+
+	aliases {
+		sw0 = &user_button1;
+		i2c-0 = &i2c0;
+		watchdog0 = &wdt0;
+	};
+
+	/* 交互按键: 触发/结束语音交互 */
+	gpio_keys {
+		compatible = "gpio-keys";
+
+		user_button1: button_1 {
+			label = "BOOT";
+			gpios = <&gpio0 9 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			zephyr,code = <INPUT_KEY_0>;
+		};
+	};
+
+	/* 功放使能, 播放音频时置高, 应用通过 DT_PATH(zephyr_user) 读取 */
+	zephyr,user {
+		pa-enable-gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&uart0 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart0_default>;
+	pinctrl-names = "default";
+};
+
+/* 板上没有原生 USB, GPIO18/GPIO19 用作外部接口 */
+&usb_serial {
+	status = "disabled";
+};
+
+/* MCU + Wi-Fi */
+&wifi {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+/* ES8311 编解码器的控制通道, 地址 0x18 */
+&i2c0 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-names = "default";
+};
+
+/* 语音采集与播放, 数据经编解码器 ES8311 在 I2S 上与 MCU 交换 */
+&i2s {
+	status = "okay";
+	pinctrl-0 = <&i2s_default>;
+	pinctrl-names = "default";
+};
+
+/* I2S 收发数据经 GDMA 搬运 */
+&dma {
+	status = "okay";
+};
+
+/* Wi-Fi 的熵源 */
+&trng0 {
+	status = "okay";
+};
+
+&wdt0 {
+	status = "okay";
+};
+
+/* 外部 SPI NOR Flash, 容量 8MB */
+&flash0 {
+	reg = <0x0 DT_SIZE_M(8)>;
+	ranges = <0x0 0x0 DT_SIZE_M(8)>;
+};

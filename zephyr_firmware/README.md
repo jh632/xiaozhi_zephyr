@@ -1,30 +1,40 @@
 # xiaozhi_zephyr 固件工程
 
-立创·实战派 ESP32-C3 开发板 V1.3 的 Zephyr 工程。
-
-- 主控: ESP32-C3（QFN32 裸片 + 40MHz 晶振）
-- 外部 Flash: MX25L6433FM2I-08G，8MB SPI NOR
-- 控制台: UART0（GPIO21 TX / GPIO20 RX）经 CH343P 转 USB Type-C
-- 原理图整理结果: [doc/SCH_ESP32-C3-V1_3.md](doc/SCH_ESP32-C3-V1_3.md)
-
 ## 板级配置
 
-基础板为 `esp32c3_devkitc`，本板差异全部放在 [boards/lichuangc3.overlay](boards/lichuangc3.overlay)：
+使用 Zephyr 主线的 `esp32c3_lckfb` 板定义（位于 `zephyr/boards/others/esp32c3_lckfb`），
+本板与它的大部分硬件描述一致，唯一差异写在 [boards/esp32c3_lckfb.overlay](boards/esp32c3_lckfb.overlay) 里，
+构建时按板名自动应用：
 
-| 项目 | 本板 | devkitc 默认值 | 覆盖动作 |
+| 项目 | 本板 | 官方 esp32c3_lckfb | 处理方式 |
 |---|---|---|---|
-| I2C0 | SDA=GPIO0, SCL=GPIO1 | SDA=GPIO1, SCL=GPIO3 | 覆盖 pinctrl |
-| USB Serial/JTAG | 未接（GPIO18/19 作 IO18/IO19） | 打开 | 关闭 |
-| SPI2 | TFT 用 GPIO3/4/5/6 | GPIO2/6/7/10 | 关闭总线 |
-| 外部 Flash | 8MB | 4MB | 覆盖 flash0 容量 |
-| BOOT 按键 | GPIO9 | GPIO9（sw0） | 无需修改 |
+| USB Serial/JTAG | 未接（GPIO18/19 作 IO18/IO19） | 打开 | overlay 关闭 |
+| I2C0 | SDA=GPIO0, SCL=GPIO1 | 相同 | 沿用 |
+| SPI2 | TFT 用 GPIO3/4/5/6 | 相同 | 沿用 |
+| 外部 Flash | 8MB | 8MB | 沿用 |
+| BOOT 按键 | GPIO9 | GPIO9（sw0） | 沿用 |
 
-分区表沿用 Zephyr 的 4MB 默认布局（`partitions_0x0_default_4M.dtsi`），
-若要用满 8MB，需要另外提供分区表。
+分区表是 Zephyr 的 8MB 默认布局（`partitions_0x0_default_8M.dtsi`）。
+
+[boards/esp_board/esp32c3_example](boards/esp_board/esp32c3_example) 是一份语音助手板的最小板级定义示例，
+从 `esp32c3_devkitc` 改写而来，只描述项目需要的硬件（MCU + Wi-Fi、语音采集、音频输出、交互按键），
+引脚按本板连接，写新板子时可以照 [它的说明](boards/esp_board/esp32c3_example/README.md) 作为起点，
+也可以用 `west build -b esp32c3_example .` 构建。
 
 ## 编译与烧录
 
-先激活 west 环境（提供 `west`、`esptool`、`pyserial`）：
+开发环境：
+
+| 项目 | 版本 |
+|---|---|
+| Zephyr | 主线开发版本 `v4.4.0-13771-gb9df9f46ae4` |
+| Zephyr SDK | 1.0.1，使用 `riscv64-zephyr-elf` 交叉编译器 |
+| west | 1.5.0 |
+| esptool | 5.3.1 |
+| pyserial | 3.5 |
+| Python | 3.14.4 |
+
+`west`、`esptool`、`pyserial` 装在 west 工作区根目录的 `.venv` 虚拟环境里，编译和烧录之前先激活它：
 
 ```bash
 cd /home/jasper/zephyrproject
@@ -35,7 +45,7 @@ source .venv/bin/activate
 
 ```bash
 cd userproject/xiaozhi_zephyr/zephyr_firmware
-west build -b esp32c3_devkitc .
+west build -b esp32c3_lckfb .
 ```
 
 烧录并抓取串口输出：

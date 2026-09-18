@@ -1,7 +1,8 @@
 # xiaozhi_zephyr 工程忽略规则
-# 参考 xiaozhi-esp32 原工程 https://github.com/78/xiaozhi-esp32 的 .gitignore, 按 Zephyr 构建体系调整。
-# 判断依据: 构建产物、缓存、中间结果、本地环境、机器相关配置不进入版本管理;
-# 源码、板级配置、prj.conf、原理图与文档、脚本一律跟踪。
+# 参考 78/xiaozhi-esp32 原工程的 .gitignore, 按 Zephyr 构建体系调整
+
+# ---- 上游参考工程 ----
+.reference/
 
 # ---- Zephyr 与 west 构建产物 ----
 build/
@@ -20,7 +21,6 @@ dist/
 releases/
 
 # ---- 中间结果与运行日志 ----
-# .cache/ 存放分析脚本与中间结果, log/ 存放 flash_and_log.sh 抓取的串口日志
 .cache/
 log/
 *.log

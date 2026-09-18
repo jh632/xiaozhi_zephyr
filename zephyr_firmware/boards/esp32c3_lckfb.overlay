@@ -1,0 +1,12 @@
+/*
+ * 立创·实战派 ESP32-C3 开发板 V1.3 在官方 esp32c3_lckfb 板定义之外的差异
+ * 引脚与网络依据原理图整理结果, 见 doc/SCH_ESP32-C3-V1_3.md
+ */
+
+/*
+ * 本板没有原生 USB, GPIO18/GPIO19 用作外部接口 J2, 官方板定义默认打开
+ * USB Serial/JTAG, 会占用这两脚, 因此关闭。
+ */
+&usb_serial {
+	status = "disabled";
+};

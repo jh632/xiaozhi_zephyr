@@ -1,0 +1,18 @@
+identifier: esp32c3_example
+name: ESP32-C3 Voice Assistant Example
+type: mcu
+arch: riscv
+toolchain:
+  - zephyr
+supported:
+  - gpio
+  - i2c
+  - i2s
+  - spi
+  - uart
+  - dma
+  - counter
+  - watchdog
+  - entropy
+  - netif:wifi
+vendor: esp_board
