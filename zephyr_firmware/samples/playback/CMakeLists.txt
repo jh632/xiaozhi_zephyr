@@ -6,6 +6,9 @@ cmake_minimum_required(VERSION 3.20.0)
 list(APPEND BOARD_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 list(APPEND DTS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 
+# 板级接线与应用共用一份 overlay, 引脚配置只保留一处
+set(EXTRA_DTC_OVERLAY_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../boards/esp32c3_lckfb.overlay)
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(playback)
 

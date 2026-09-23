@@ -14,7 +14,7 @@
 /* ES8311 寄存器地址范围 0x00-0xFF */
 #define ES8311_EMUL_REG_COUNT 256U
 
-/* 读取模拟寄存器, 地址越界返回 0 */
+/* 读取模拟寄存器值 */
 uint8_t es8311_emul_reg(const struct emul *target, uint8_t reg);
 
 #endif /* ES8311_EMUL_H_ */

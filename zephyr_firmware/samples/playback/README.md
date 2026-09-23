@@ -7,7 +7,7 @@
 |---|---|
 | [src/main.c](src/main.c) | 播放流程 |
 | [audio/clip.pcm](audio/clip.pcm) | 待播放的音频内容，构建时转成字节数组嵌入固件 |
-| [boards/esp32c3_lckfb.overlay](boards/esp32c3_lckfb.overlay) | 板级接线（编解码器、功放、I2S 引脚） |
+| [boards/esp32c3_lckfb.overlay](../../boards/esp32c3_lckfb.overlay) | 板级接线（编解码器、功放、I2S 引脚），与应用共用，由 CMakeLists.txt 引入 |
 | [CMakeLists.txt](CMakeLists.txt) | 复用应用目录下的 ES8311 驱动与设备树绑定 |
 
 ## 构建与烧录
@@ -37,9 +37,9 @@ sox 歌曲.mp3 -c 2 -r 16000 -t raw audio/clip.pcm
 ```
 
 示例自带的内容是 11.2 秒的合成音频，旋律为欢乐颂主题（公有领域）。
-文件内容会完整编译进固件：16 kHz 双声道每秒占用 64 KB，这段内容用掉 716 KB，
-整个固件（含驱动与内核）占用 854 KB。应用分区有 3.75 MB，固件本身占 137 KB，
-剩下的空间最长可以放一分钟左右的音频；整首歌需要等联网获取音频的功能做好之后才能播放，
+文件内容会完整编译进固件：16 kHz 双声道每秒占用 64 KB，这段内容用掉 700 KB，
+镜像总共 834 KB（其中代码与内核约 134 KB）。应用分区有 3.75 MB，去掉代码与内核
+之后音频最长可以放一分钟左右；整首歌需要等联网获取音频的功能做好之后才能播放，
 届时音频经网络流式传输，不再占用 Flash。
 
 ## 实现要点

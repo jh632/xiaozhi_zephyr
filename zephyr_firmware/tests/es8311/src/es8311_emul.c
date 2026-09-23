@@ -39,19 +39,16 @@ static const struct {
 	{0x12, 0x02},
 	{0x13, 0x40},
 	{0x14, 0x10},
-	{0x15, 0x00},
 	{0x16, 0x04},
 	{0x1B, 0x0C},
 	{0x1C, 0x4C},
 	{0x37, 0x08},
 	{0xFD, 0x83},
 	{0xFE, 0x11},
-	{0xFF, 0x00},
 };
 
 struct es8311_emul_data {
 	uint8_t regs[ES8311_EMUL_REG_COUNT];
-	uint8_t reg_addr;
 };
 
 uint8_t es8311_emul_reg(const struct emul *target, uint8_t reg)
@@ -65,6 +62,7 @@ static int es8311_emul_transfer(const struct emul *target, struct i2c_msg *msgs,
 				int addr)
 {
 	struct es8311_emul_data *data = target->data;
+	uint8_t reg_addr;
 
 	ARG_UNUSED(addr);
 
@@ -74,8 +72,8 @@ static int es8311_emul_transfer(const struct emul *target, struct i2c_msg *msgs,
 			return -EINVAL;
 		}
 
-		data->reg_addr = msgs[0].buf[0];
-		data->regs[data->reg_addr] = msgs[0].buf[1];
+		reg_addr = msgs[0].buf[0];
+		data->regs[reg_addr] = msgs[0].buf[1];
 
 		return 0;
 	}
@@ -87,10 +85,10 @@ static int es8311_emul_transfer(const struct emul *target, struct i2c_msg *msgs,
 			return -EINVAL;
 		}
 
-		data->reg_addr = msgs[0].buf[0];
+		reg_addr = msgs[0].buf[0];
 
 		for (uint16_t idx = 0; idx < msgs[1].len; idx++) {
-			msgs[1].buf[idx] = data->regs[(data->reg_addr + idx) % ES8311_EMUL_REG_COUNT];
+			msgs[1].buf[idx] = data->regs[(reg_addr + idx) % ES8311_EMUL_REG_COUNT];
 		}
 
 		return 0;
@@ -108,8 +106,6 @@ static const struct i2c_emul_api es8311_emul_api = {
 static int es8311_emul_init(const struct emul *target, const struct device *parent)
 {
 	struct es8311_emul_data *data = target->data;
-
-	ARG_UNUSED(parent);
 
 	memset(data->regs, 0, sizeof(data->regs));
 

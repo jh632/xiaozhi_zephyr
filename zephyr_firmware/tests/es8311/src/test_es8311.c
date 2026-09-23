@@ -130,7 +130,7 @@ ZTEST(es8311_codec, test_configure_rate_table)
 
 ZTEST(es8311_codec, test_configure_rejects_invalid_parameters)
 {
-	struct audio_codec_cfg cfg = default_cfg();
+	struct audio_codec_cfg cfg;
 
 	cfg = default_cfg();
 	cfg.mclk_freq = 12288000;

@@ -9,7 +9,7 @@
  * 寄存器定义与取值依据:
  *   - ES8311 Datasheet Rev 8.0 §8 CONFIGURATION REGISTER DEFINITION
  *   - ES8311 User Guide Rev 1.11 §8 时钟、§9 上下电、§10 ADC、§11 DAC
- *   - ESP-ADF components/audio_hal/driver/es8311/es8311.c, 逐位与手册核对
+ *   - ESP-ADF components/audio_hal/driver/es8311/es8311.c
  */
 
 #define DT_DRV_COMPAT everest_es8311
@@ -143,8 +143,11 @@ struct es8311_reg_val {
 /*
  * 固定初始化序列。模拟偏置(0x10/0x11)、ADC 高通系数(0x1B/0x1C)、输出驱动(0x13)
  * 取参考驱动的取值, 手册中标注为内部使用, 未公开字段含义。
+ *
+ * 0x44 连写两次: 上电后第一条 I2C 写入可能丢失, 参考驱动据此把首条写入重复一次。
  */
 static const struct es8311_reg_val es8311_init_table[] = {
+	{REG_GPIO_44, GPIO_44_I2C_WL},
 	{REG_GPIO_44, GPIO_44_I2C_WL},
 	{REG_CLKMGR_01, CLKMGR_MCLK_ON | CLKMGR_BCLK_ON},
 	{REG_CLKMGR_02, 0x00},
@@ -469,17 +472,6 @@ static int es8311_configure(const struct device *dev, struct audio_codec_cfg *cf
 			LOG_ERR("初始化寄存器 0x%02X 失败: %d", es8311_init_table[idx].reg, ret);
 			return ret;
 		}
-
-		/*
-		 * 上电后第一次 I2C 写入可能丢失, 参考驱动据此对首条写入重复一次,
-		 * 这里对 I2C 抗扰寄存器做同样处理。
-		 */
-		if (es8311_init_table[idx].reg == REG_GPIO_44) {
-			ret = es8311_write_reg(dev, REG_GPIO_44, GPIO_44_I2C_WL);
-			if (ret < 0) {
-				return ret;
-			}
-		}
 	}
 
 	/*
@@ -528,46 +520,6 @@ static int es8311_configure(const struct device *dev, struct audio_codec_cfg *cf
 		cfg->dai_cfg.i2s.channels, cfg->mclk_freq);
 
 	return 0;
-}
-
-static void es8311_start_output(const struct device *dev)
-{
-	struct es8311_data *data = dev->data;
-	int ret;
-
-	if (!data->configured) {
-		LOG_ERR("尚未配置就请求开始播放");
-		return;
-	}
-
-	if (data->route == AUDIO_ROUTE_CAPTURE) {
-		LOG_ERR("配置的通路不含播放方向");
-		return;
-	}
-
-	if ((data->active_dirs & AUDIO_DAI_DIR_TX) != 0) {
-		return;
-	}
-
-	ret = es8311_tx_enable(dev, true);
-	if (ret < 0) {
-		LOG_ERR("开启播放通路失败: %d", ret);
-	}
-}
-
-static void es8311_stop_output(const struct device *dev)
-{
-	struct es8311_data *data = dev->data;
-	int ret;
-
-	if ((data->active_dirs & AUDIO_DAI_DIR_TX) == 0) {
-		return;
-	}
-
-	ret = es8311_tx_enable(dev, false);
-	if (ret < 0) {
-		LOG_ERR("关闭播放通路失败: %d", ret);
-	}
 }
 
 static int es8311_start(const struct device *dev, audio_dai_dir_t dir)
@@ -630,6 +582,25 @@ static int es8311_stop(const struct device *dev, audio_dai_dir_t dir)
 	}
 
 	return 0;
+}
+
+/* 播放方向的便捷入口, 与 audio_codec_start(dev, AUDIO_DAI_DIR_TX) 等价 */
+static void es8311_start_output(const struct device *dev)
+{
+	int ret = es8311_start(dev, AUDIO_DAI_DIR_TX);
+
+	if (ret < 0) {
+		LOG_ERR("开启播放通路失败: %d", ret);
+	}
+}
+
+static void es8311_stop_output(const struct device *dev)
+{
+	int ret = es8311_stop(dev, AUDIO_DAI_DIR_TX);
+
+	if (ret < 0) {
+		LOG_ERR("关闭播放通路失败: %d", ret);
+	}
 }
 
 static int es8311_set_property(const struct device *dev, audio_property_t property,
