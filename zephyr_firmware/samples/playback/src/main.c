@@ -13,9 +13,10 @@
 #include <string.h>
 
 #define SAMPLE_RATE  16000U
+#define CHANNELS     2U
 #define BLOCK_MS     20U
 #define BLOCK_FRAMES (SAMPLE_RATE / 1000U * BLOCK_MS)
-#define BLOCK_SIZE   (BLOCK_FRAMES * 2U * sizeof(int16_t))
+#define BLOCK_SIZE   (BLOCK_FRAMES * CHANNELS * sizeof(int16_t))
 #define BLOCK_COUNT  4U
 
 K_MEM_SLAB_DEFINE(playback_tx_slab, BLOCK_SIZE, BLOCK_COUNT, 4);
@@ -25,7 +26,7 @@ static const uint8_t s_clip_pcm[] = {
 #include <clip.pcm.inc>
 };
 
-/* i2s_buf_write 会在这块缓冲与驱动内部块之间拷贝 */
+/* 待送出的整块数据, i2s_buf_write 会把它拷进驱动内部块 */
 static uint8_t s_block[BLOCK_SIZE];
 
 /* 把音频里从第 offset 字节开始的一块送入 I2S, 末尾不足一块的部分补静音 */
@@ -50,7 +51,7 @@ int main(void)
 		.dai_route = AUDIO_ROUTE_PLAYBACK,
 		.dai_cfg.i2s = {
 			.word_size = 16U,
-			.channels = 2U,
+			.channels = CHANNELS,
 			.format = I2S_FMT_DATA_FORMAT_I2S,
 			/* 时钟由 MCU 产生, 编解码器作为从机 */
 			.options = I2S_OPT_BIT_CLK_TARGET | I2S_OPT_FRAME_CLK_TARGET,
@@ -61,7 +62,7 @@ int main(void)
 	};
 	struct i2s_config i2s_cfg = {
 		.word_size = 16U,
-		.channels = 2U,
+		.channels = CHANNELS,
 		.format = I2S_FMT_DATA_FORMAT_I2S,
 		.options = I2S_OPT_BIT_CLK_CONTROLLER | I2S_OPT_FRAME_CLK_CONTROLLER,
 		.frame_clk_freq = SAMPLE_RATE,

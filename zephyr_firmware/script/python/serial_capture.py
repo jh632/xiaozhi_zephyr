@@ -38,4 +38,5 @@ def main():
 				sys.stdout.buffer.flush()
 
 
-sys.exit(main())
+if __name__ == "__main__":
+	sys.exit(main())
