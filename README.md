@@ -34,8 +34,8 @@ I2C0 使用 GPIO0 作 SDA、GPIO1 作 SCL，板上 R4/R5 已经有 4.7kΩ 上拉
 I2S 使用 GPIO7/8/10/11/12，其中 GPIO11/12/13 原本是外部 Flash 的 VDD_SPI、SPIHD、SPIWP，
 因为 Flash 由 3V3 供电而被复用，所以 Flash 只能工作在单线或双线模式，不能使用 QIO/QPI。
 
-完整的引脚与网络对照见 [zephyr_firmware/doc/SCH_ESP32-C3-V1_3.md](zephyr_firmware/doc/SCH_ESP32-C3-V1_3.md)，
-原始原理图 PDF 是 [zephyr_firmware/doc/SCH_ESP32-C3-V1_3_2026-09-17.pdf](zephyr_firmware/doc/SCH_ESP32-C3-V1_3_2026-09-17.pdf)。
+完整的引脚与网络对照见 [zephyr_firmware/doc/05-reference/hardware/SCH_ESP32-C3-V1_3.md](zephyr_firmware/doc/05-reference/hardware/SCH_ESP32-C3-V1_3.md)，
+原始原理图 PDF 是 [zephyr_firmware/doc/05-reference/hardware/SCH_ESP32-C3-V1_3_2026-09-17.pdf](zephyr_firmware/doc/05-reference/hardware/SCH_ESP32-C3-V1_3_2026-09-17.pdf)。
 
 ## 板级配置
 
