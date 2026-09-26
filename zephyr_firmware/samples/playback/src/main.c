@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * 音频播放示例: 把 audio/clip.pcm 里的原始 PCM 经 I2S 送给 ES8311, 由扬声器放出来。
+ * 音频播放示例: 把 audio/clip.pcm 里的原始 PCM 经 I2S 送给编解码器, 由扬声器放出来。
  * 音频为 16 kHz / 16 位 / 双声道, 换成自己的音频的办法见 README.md。
  */
 
@@ -45,7 +45,7 @@ int main(void)
 	const struct device *i2s_dev = DEVICE_DT_GET(DT_NODELABEL(i2s));
 	const struct device *codec_dev = DEVICE_DT_GET(DT_NODELABEL(audio_codec));
 	struct audio_codec_cfg codec_cfg = {
-		/* I2S 控制器输出的 MCLK 固定为 256 倍采样率 */
+		/* 驱动要求 MCLK 为 256 倍采样率 */
 		.mclk_freq = SAMPLE_RATE * 256U,
 		.dai_type = AUDIO_DAI_TYPE_I2S,
 		.dai_route = AUDIO_ROUTE_PLAYBACK,
@@ -88,7 +88,7 @@ int main(void)
 		return ret;
 	}
 
-	/* 第一块要在启动前送入, 发送队列空转会被 ESP32 的 I2S 驱动判为错误 */
+	/* 第一块要在启动前送入, 发送队列空转会被 I2S 驱动判为错误 */
 	ret = audio_send_block(i2s_dev, 0U);
 	if (ret < 0) {
 		goto err_stop;

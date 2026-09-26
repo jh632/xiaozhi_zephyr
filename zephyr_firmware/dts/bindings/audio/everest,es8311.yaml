@@ -14,5 +14,5 @@ properties:
   pa-supply:
     type: phandle
     description: |
-      扬声器功放(本板为 NS4150B)的供电开关, 指向一个 regulator 节点。
+      扬声器功放的供电开关, 指向一个 regulator 节点。
       播放开始时由驱动使能, 播放结束后关闭, 使能顺序与解除静音配合避免爆音。

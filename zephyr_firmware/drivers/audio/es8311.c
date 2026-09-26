@@ -108,7 +108,7 @@ LOG_MODULE_REGISTER(everest_es8311, CONFIG_AUDIO_CODEC_LOG_LEVEL);
 #define CHIP_ID1_VALUE               0x83
 #define CHIP_ID2_VALUE               0x11
 
-/* I2S 控制器在 16/32 位字长下输出的 MCLK 固定为 256 倍采样率 */
+/* 时钟链与速率系数表都按 256 倍采样率的 MCLK 设计 */
 #define MCLK_FS_RATIO                256
 
 /* 音量寄存器标度: 0xBF 为 0dB, 步进 0.5dB, 0x00 为 -95.5dB, 0xFF 为 +32dB */
@@ -426,7 +426,7 @@ static int es8311_configure(const struct device *dev, struct audio_codec_cfg *cf
 		return -ENOTSUP;
 	}
 
-	/* 本板 codec 只能作从机, 时钟由 I2S 控制器提供 */
+	/* 器件以从机模式工作, 时钟由 I2S 控制器提供 */
 	if ((cfg->dai_cfg.i2s.options & I2S_OPT_BIT_CLK_TARGET) == 0 ||
 	    (cfg->dai_cfg.i2s.options & I2S_OPT_FRAME_CLK_TARGET) == 0) {
 		LOG_ERR("ES8311 需要以从机模式工作, 请设置 I2S_OPT_BIT_CLK_TARGET 与 "
@@ -434,7 +434,7 @@ static int es8311_configure(const struct device *dev, struct audio_codec_cfg *cf
 		return -ENOTSUP;
 	}
 
-	/* 时钟链按 256 倍采样率配置, 与 I2S 控制器输出的 MCLK 一致 */
+	/* 时钟链按 256 倍采样率配置 */
 	if (cfg->mclk_freq != cfg->dai_cfg.i2s.frame_clk_freq * MCLK_FS_RATIO) {
 		LOG_ERR("MCLK 应为 %u 倍采样率, 即 %u Hz, 实际 %u Hz", MCLK_FS_RATIO,
 			cfg->dai_cfg.i2s.frame_clk_freq * MCLK_FS_RATIO, cfg->mclk_freq);

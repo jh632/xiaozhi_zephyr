@@ -2,13 +2,11 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 
-# 复用应用目录下的板级定义 boards/esp_board 与 ES8311 的设备树绑定 dts/bindings
+# 复用应用目录下的板级定义 boards/ 与编解码器的设备树绑定 dts/bindings
 list(APPEND BOARD_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 list(APPEND DTS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 
-# 板级接线与应用共用一份 overlay, 引脚配置只保留一处
-set(EXTRA_DTC_OVERLAY_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../boards/esp32c3_lckfb.overlay)
-
+# 板级接线由所用板子的设备树提供, 示例只依赖 i2s 与 audio_codec 两个节点
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(playback)
 

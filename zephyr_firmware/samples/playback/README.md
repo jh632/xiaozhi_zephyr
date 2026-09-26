@@ -1,21 +1,22 @@
 # 音频播放示例
 
-把一段原始 PCM 经 I2S 送给 ES8311，由板载扬声器放出来。这是在本工程里播放音频
+把一段原始 PCM 经 I2S 送给编解码器，由扬声器放出来。这是在本工程里播放音频
 需要的最小内容：配置编解码器与 I2S、打开播放通路、按块送数据、等发送结束再收尾。
 
 | 文件 | 作用 |
 |---|---|
 | [src/main.c](src/main.c) | 播放流程 |
 | [audio/clip.pcm](audio/clip.pcm) | 待播放的音频内容，构建时转成字节数组嵌入固件 |
-| [boards/esp32c3_lckfb.overlay](../../boards/esp32c3_lckfb.overlay) | 板级接线（编解码器、功放、I2S 引脚），与应用共用，由 CMakeLists.txt 引入 |
-| [CMakeLists.txt](CMakeLists.txt) | 复用应用目录下的 ES8311 驱动与设备树绑定 |
+| [CMakeLists.txt](CMakeLists.txt) | 复用应用目录下的编解码器驱动与设备树绑定 |
 
 ## 构建与烧录
 
-在 `zephyr_firmware` 目录下执行：
+目标板的设备树需要描述 `i2s` 与 `audio_codec` 两个节点，示例通过 `DT_NODELABEL` 取它们，
+接线由所选板子的定义提供；仓库自带的 [boards/esp_board/esp32c3_example](../../boards/esp_board/esp32c3_example)
+就是这样一份板级定义。在 `zephyr_firmware` 目录下执行：
 
 ```bash
-west build -p always -b esp32c3_lckfb -d samples/playback/build samples/playback
+west build -p always -b esp32c3_example -d samples/playback/build samples/playback
 west flash -d samples/playback/build
 ```
 
@@ -45,9 +46,9 @@ sox 歌曲.mp3 -c 2 -r 16000 -t raw audio/clip.pcm
 ## 实现要点
 
 - 播放通路用 `audio_codec_start(codec_dev, AUDIO_DAI_DIR_TX)` 打开，驱动在这里
-  使能功放 NS4150B 并解除 DAC 静音，收尾的 `audio_codec_stop` 反过来关闭。
+  使能功放并解除 DAC 静音，收尾的 `audio_codec_stop` 反过来关闭。
 - 数据按 20 毫秒一块从音频数组拷进缓冲，经 `i2s_buf_write` 送入，第一块在
-  `I2S_TRIGGER_START` 之前排入队列，发送队列空转会被 ESP32 的 I2S 驱动判为错误。
-- I2S 配置为两个槽位（ESP32-C3 的 I2S 驱动只支持两个槽位），音频按双声道存放。
+  `I2S_TRIGGER_START` 之前排入队列，发送队列空转会被 I2S 驱动判为错误。
+- I2S 配置为两个槽位，音频按双声道存放。
 - 送完全部数据后先 `I2S_TRIGGER_DRAIN`，等队列排空再关闭通路，结尾的几块数据
   不会被切掉。
